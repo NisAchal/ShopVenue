@@ -45,6 +45,10 @@ class Products with ChangeNotifier {
     return [..._items];
   }
 
+  List<Product> get favorites {
+    return _items.where((product) => product.isFavourite).toList();
+  }
+
   Product findById(String id) {
     // ignore: unrelated_type_equality_checks
     return _items.firstWhere((products) => products.id == findById);

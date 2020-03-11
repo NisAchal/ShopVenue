@@ -1,51 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_venue_app/models/product.dart';
+import 'package:shop_venue_app/provider/cart_provider.dart';
 import 'package:shop_venue_app/screens/product_detail_screen.dart';
 
+///---This builds the Products of the main screen--//
+
 class ProductItem extends StatelessWidget {
-  final String imgUrl;
-  final String title;
-  final String id;
-  ProductItem({this.title, this.imgUrl, this.id});
   @override
   Widget build(BuildContext context) {
-    void _selectedProduct(BuildContext context) {
-      Navigator.pushNamed(context, ProductDetailScreen.routeName,
-          arguments: {'id': id, 'title': 'title'});
-    }
-
+    final cart = Provider.of<Cart>(context, listen: false);
+    final selectedProducts = Provider.of<Product>(context, listen: false);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(25.0),
+      borderRadius: BorderRadius.circular(14),
       child: GridTile(
         child: GestureDetector(
-            onTap: () => _selectedProduct(context),
-            child: Image.network(imgUrl, fit: BoxFit.cover)),
+          onTap: () {
+            Navigator.pushNamed(context, ProductDetailScreen.routeName,
+                arguments: selectedProducts.id);
+          },
+          child: Hero(
+            child: Image.network(
+              selectedProducts.imageURL,
+              fit: BoxFit.cover,
+            ),
+            tag: 'product${selectedProducts.id}',
+          ),
+        ),
         footer: GridTileBar(
-          backgroundColor: Colors.black54,
+          backgroundColor: Colors.black87,
           title: Text(
-            title,
+            selectedProducts.title,
             textAlign: TextAlign.center,
           ),
-          leading: IconButton(
-            icon: Icon(
-              Icons.favorite,
-              color: Colors.red,
-            ),
-            onPressed: () {},
+          leading: Consumer<Product>(
+            builder: (ctx, builder, _) {
+              return IconButton(
+                icon: Icon(selectedProducts.isFavourite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                onPressed: () {
+                  selectedProducts.toggleIsFavourite();
+                },
+                color: Theme.of(context).accentColor,
+              );
+            },
           ),
           trailing: IconButton(
             icon: Icon(Icons.shopping_cart),
-            onPressed: () {},
-          ),
-        ),
-        header: GridTileBar(
-          backgroundColor: Colors.black38,
-          title: Text(
-            title,
-            style: Theme.of(context)
-                .textTheme
-                .title
-                .copyWith(fontSize: 20, color: Colors.white),
-            textAlign: TextAlign.center,
+            onPressed: () {
+              cart.addItemInCart(selectedProducts.id, selectedProducts.price,
+                  selectedProducts.title);
+            },
+            color: Theme.of(context).accentColor,
           ),
         ),
       ),
